@@ -3,6 +3,7 @@ using System.Text;
 using API.Data;
 using API.DTOs;
 using API.Entities;
+using API.Extensions;
 using API.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -28,13 +29,7 @@ public class AccountsController(AppDbContext context, ITokenService tokenService
 
         context.AppUsers.Add(user);
         await context.SaveChangesAsync();
-        return new UserDTO
-        {
-            Id = user.Id.ToString(),
-            UserName = user.UserName,
-            Email = user.Email,
-            Token = tokenService.CreateToken(user)
-        };
+        return user.ToDto(tokenService);
     }
 
     [HttpPost("login")]
@@ -50,13 +45,7 @@ public class AccountsController(AppDbContext context, ITokenService tokenService
             if (computedHash[i] != user.PasswordHash[i]) return Unauthorized(invalidMessage);
         }
 
-        return new UserDTO
-        {
-            Id = user.Id.ToString(),
-            UserName = user.UserName,
-            Email = user.Email,
-            Token = tokenService.CreateToken(user)
-        };
+        return user.ToDto(tokenService);
     }
 
     private async Task<bool> EmailExists(string email)
