@@ -3,36 +3,42 @@ using System.Text;
 using API.Data;
 using API.DTOs;
 using API.Entities;
+using API.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers;
 
-public class AccountsController(AppDbContext context) : BaseApiController
+public class AccountsController(AppDbContext context, ITokenService tokenService) : BaseApiController
 {
     [HttpPost("register")]
-    public async Task<ActionResult<AppUser>> Register(RegisterDTO registerDto)
+    public async Task<ActionResult<UserDTO>> Register(RegisterDTO registerDto)
     {
-        
         var doesEmailExist = await EmailExists(registerDto.Email);
-        if(doesEmailExist) return BadRequest("Email already exists");
+        if (doesEmailExist) return BadRequest("Email already exists");
         using var hmac = new HMACSHA512();
 
         var user = new AppUser
         {
-            UserName = registerDto.UserName, 
+            UserName = registerDto.UserName,
             Email = registerDto.Email,
             PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password)),
             PasswordSalt = hmac.Key
         };
-        
+
         context.AppUsers.Add(user);
         await context.SaveChangesAsync();
-        return user;
+        return new UserDTO
+        {
+            Id = user.Id.ToString(),
+            UserName = user.UserName,
+            Email = user.Email,
+            Token = tokenService.CreateToken(user)
+        };
     }
 
     [HttpPost("login")]
-    public async Task<ActionResult<AppUser>> Login(LoginDTO loginDto)
+    public async Task<ActionResult<UserDTO>> Login(LoginDTO loginDto)
     {
         string invalidMessage = "Email or password is incorrect";
         var user = await context.AppUsers.SingleOrDefaultAsync(u => u.Email == loginDto.Email);
@@ -43,7 +49,14 @@ public class AccountsController(AppDbContext context) : BaseApiController
         {
             if (computedHash[i] != user.PasswordHash[i]) return Unauthorized(invalidMessage);
         }
-        return user;
+
+        return new UserDTO
+        {
+            Id = user.Id.ToString(),
+            UserName = user.UserName,
+            Email = user.Email,
+            Token = tokenService.CreateToken(user)
+        };
     }
 
     private async Task<bool> EmailExists(string email)
