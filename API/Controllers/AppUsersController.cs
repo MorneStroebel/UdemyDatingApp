@@ -5,8 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
-{
-    [Authorize]
+{  
     public class AppUsersController(AppDbContext context) : BaseApiController
     {
         [HttpGet]
