@@ -5,14 +5,13 @@ import {Nav} from '../layouts/nav/nav';
 import {AccountService} from '../core/services/account-service';
 import {lastValueFrom} from 'rxjs';
 import {User} from '../types/user';
-import {Home} from '../features/home/home';
+import {Router, RouterOutlet} from '@angular/router';
 
 @Component({
   selector: 'app-root',
   imports: [
-    NgOptimizedImage,
     Nav,
-    Home
+    RouterOutlet
   ],
   templateUrl: './app.html',
   styleUrl: './app.css'
@@ -20,7 +19,7 @@ import {Home} from '../features/home/home';
 export class App implements OnInit {
   private accountService = inject(AccountService);
   private http = inject(HttpClient)
-  protected readonly title = signal('UdemyDating App');
+  protected router = inject(Router)
   protected appUsers = signal<User[]>([]);
 
   async ngOnInit() {
