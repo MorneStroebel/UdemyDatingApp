@@ -11,6 +11,8 @@ export interface LoginCreds {
   password: string
 }
 
-export interface RegisterCreds extends LoginCreds {
+export interface RegisterCreds {
   userName: string
+  email: string
+  password: string
 }

@@ -21,7 +21,7 @@ export class App implements OnInit {
   private accountService = inject(AccountService);
   private http = inject(HttpClient)
   protected readonly title = signal('UdemyDating App');
-  protected appUsers = signal<any>([]);
+  protected appUsers = signal<User[]>([]);
 
   async ngOnInit() {
     this.appUsers.set(await this.getAppUsers());
@@ -38,7 +38,7 @@ export class App implements OnInit {
 
   async getAppUsers() {
     try {
-      return lastValueFrom(this.http.get("https://localhost:7290/api/AppUsers"));
+      return lastValueFrom(this.http.get<User[]>("https://localhost:7290/api/AppUsers"));
     } catch (error) {
       console.error(error);
       throw error;
