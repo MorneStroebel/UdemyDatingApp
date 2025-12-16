@@ -1,6 +1,7 @@
-import {Component, output} from '@angular/core';
+import {Component, inject, output} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {RegisterCreds} from '../../../types/user';
+import {AccountService} from '../../../core/services/account-service';
 
 @Component({
   selector: 'app-register',
@@ -9,14 +10,19 @@ import {RegisterCreds} from '../../../types/user';
   styleUrl: './register.css',
 })
 export class Register {
+  private accountService = inject(AccountService);
   cancelRegister = output<boolean>();
   protected creds: RegisterCreds = {} as RegisterCreds;
 
   register() {
-    console.log(this.creds);
+    this.accountService.register(this.creds).subscribe({
+      next: (data) => {
+        this.cancel()
+      }
+    });
   }
 
-  cancel(){
+  cancel() {
     this.cancelRegister.emit(false);
   }
 }
